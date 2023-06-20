@@ -2,9 +2,6 @@ U-net :
 https://github.com/DeepTrial/Retina-VesselNet
 
 U-net :
-https://github.com/nikhilroxtomar/Retina-Blood-Vessel-Segmentation-using-UNET-in-TensorFlow
-
-U-net :
 https://github.com/DIAGNijmegen/drive-vessels-unet
 
 FR-UNet (AUC = 989) :
