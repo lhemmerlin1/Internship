@@ -3,6 +3,6 @@ This project focus on the implementation of a deep learning model to do the segm
 
 I will put the presentations here :
 
-16/06 : https://tome.app/nimporte-812/template-product-design-review-clixtn3wi0itwod3ccrica005
+16/06 : https://tome.app/nimporte-812/presentation-1606-clixtn3wi0itwod3ccrica005
 
 03/07 : https://tome.app/nimporte-812/presentation-0307-cljmjtp6s09hioa3anavzhfpe
