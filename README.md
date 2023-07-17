@@ -6,3 +6,5 @@ I will put the presentations here :
 16/06 : https://tome.app/nimporte-812/presentation-1606-clixtn3wi0itwod3ccrica005
 
 03/07 : https://tome.app/nimporte-812/presentation-0307-cljmjtp6s09hioa3anavzhfpe
+
+17/07 : https://tome.app/nimporte-812/presentation-1707-cljmjtp6s09hioa3anavzhfpe
