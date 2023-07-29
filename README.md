@@ -8,3 +8,5 @@ I will put the presentations here :
 03/07 : https://tome.app/nimporte-812/presentation-0307-cljmjtp6s09hioa3anavzhfpe
 
 17/07 : https://tome.app/nimporte-812/presentation-1707-cljmjtp6s09hioa3anavzhfpe
+
+28/07 : https://tome.app/nimporte-812/presentation-2807-clkm9l0z500vqoe5rxakk4gwk
