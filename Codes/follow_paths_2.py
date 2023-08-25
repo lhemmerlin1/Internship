@@ -5,6 +5,7 @@ from sklearn.decomposition import PCA
 from skimage.morphology import skeletonize
 import time
 
+
 def find_endpoints(img):
 
     height, width = img.shape
@@ -16,13 +17,13 @@ def find_endpoints(img):
             if img[y, x] > 0:
 
                 neighborhood = img[y - 1:y + 2, x - 1:x + 2]
-                non_zero_count = np.count_nonzero(neighborhood)
+                non_zero_count = np.count_nonzero(neighborhood) 
 
-                if non_zero_count < 3:
-
+                if non_zero_count < 3:  # If the number of neighborhood is <3 it has to be an extremity 
                     result[y, x] = 255
 
     return result
+
 
 def get_candidate_points(current_point, vesselness, search_window_size):
 
@@ -33,6 +34,7 @@ def get_candidate_points(current_point, vesselness, search_window_size):
     candidate_points += [max(0, current_point[0] - search_window_size), max(0, current_point[1] - search_window_size)]
 
     return candidate_points
+
 
 def get_initial_direction(seed, vesselness, neighborhood_size):
 
@@ -51,19 +53,19 @@ def get_initial_direction(seed, vesselness, neighborhood_size):
 
     return initial_direction
 
+
 def choose_next_point(current_point, candidate_points, vesselness, current_direction, visited_points):
 
-    candidate_points = np.array([point for point in candidate_points if tuple(point) not in visited_points])
+    candidate_points = np.array([point for point in candidate_points if tuple(point) not in visited_points]) # Don't allow to visit points already visited by the path
 
     if candidate_points.size == 0:
-
         return None
     
     directions_to_candidates = candidate_points - current_point
     cosine_similarity = np.dot(directions_to_candidates, current_direction) / (np.linalg.norm(directions_to_candidates, axis=1) * np.linalg.norm(current_direction))
     cosine_similarity = np.clip(cosine_similarity, -1, 1)
     angles = np.arccos(cosine_similarity)
-    valid_candidates = candidate_points[angles < np.pi]
+    valid_candidates = candidate_points[angles < np.pi] # The research angle is <pi to avoid going back
 
     if valid_candidates.size == 0:
 
@@ -72,6 +74,7 @@ def choose_next_point(current_point, candidate_points, vesselness, current_direc
     next_point = valid_candidates[np.argmax(vesselness[valid_candidates[:, 0], valid_candidates[:, 1]])]
 
     return next_point
+
 
 def follow_path(seed, vesselness, bac_image, search_window_size, neighborhood_size):
 
@@ -93,77 +96,32 @@ def follow_path(seed, vesselness, bac_image, search_window_size, neighborhood_si
         new_direction = next_point - current_point
         current_direction = 0.3 * current_direction + 0.7 * new_direction
         current_direction /= np.linalg.norm(current_direction)
-        #current_direction = next_point - current_point
+
     return path
 
-#def main(vesselness_path, bac_path, original_image_path, patch_size=500):
-    start_time = time.time()
-    bac_image = cv2.imread(bac_path, cv2.IMREAD_GRAYSCALE)
-    vesselness = cv2.imread(vesselness_path, cv2.IMREAD_GRAYSCALE)
-    original_image = plt.imread(original_image_path)
 
-    target_size = original_image.shape
-    #print(bac_image.shape)
-    target_size = (target_size[1], target_size[0])
-    vesselness = cv2.resize(vesselness, target_size)
-    #print(vesselness.shape)
-
-    skeleton = skeletonize(bac_image > 0)
-    end_points = find_endpoints(skeleton)
-
-    # Combine bac_image et the vesselness
-    vesselness = np.where(vesselness > 100, 255, 0) #pour 100 pas mal du tout
-    combined_image = np.maximum(bac_image, vesselness)
-
-    #plt.figure()
-    #plt.imshow(skeleton)
-    #plt.show()
-
-    plt.figure()
-    for i in range(0, bac_image.shape[0], patch_size):
-        for j in range(0, bac_image.shape[1], patch_size):
-            bac_patch = skeleton[i:i+patch_size, j:j+patch_size]
-            seed_patch = end_points[i:i+patch_size, j:j+patch_size]
-            combined_patch = combined_image[i:i+patch_size, j:j+patch_size]
-            
-            paths = [follow_path(seed, combined_patch, bac_patch, search_window_size=7, neighborhood_size=10) for seed in np.argwhere(seed_patch > 0)]
-        
-            for path in paths:
-                plt.plot([j + point[1] for point in path], [i + point[0] for point in path], color='r')
-
-    end_time = time.time()
-    print(f"Running time: {end_time - start_time} seconds")
-    #end_points_img = np.argwhere(end_points > 0)
-    #plt.scatter(end_points_img[:, 1], end_points_img[:, 0], color='b', s=50)
-    #plt.imshow(original_image, cmap='gray')
-    plt.imshow(bac_image, cmap= 'Reds')#, alpha=0.5, cmap='Reds')
-    plt.savefig(output_image_path)
-    plt.show()
-
-def main(vesselness_path, bac_path, patch_size=200):
+def main(vesselness_path, bac_path, patch_size=200, search_window_size=15, neighborhood_size=30):
 
     start_time = time.time()
     bac_image = cv2.imread(bac_path, cv2.IMREAD_GRAYSCALE)
     vesselness = cv2.imread(vesselness_path, cv2.IMREAD_GRAYSCALE)
 
-    # Créer une copie de bac_image pour dessiner les chemins en blanc
-    bac_image_copy = np.copy(bac_image)
+    bac_image_copy = np.copy(bac_image) #Copy used to plot and save the output image
 
     target_size = bac_image.shape
     #print(bac_image.shape)
     target_size = (target_size[1], target_size[0])
-    vesselness = cv2.resize(vesselness, target_size)
+    vesselness = cv2.resize(vesselness, target_size) #Resize to avoid shape issues
     #print(vesselness.shape)
 
-    skeleton = skeletonize(bac_image > 0)
-    end_points = find_endpoints(skeleton)
+    skeleton = skeletonize(bac_image > 0) #Skeletonize the bac image
+    end_points = find_endpoints(skeleton)  # Only keep the extremeties
 
-    # Combine bac_image et the vesselness
-    vesselness = np.where(vesselness > 100, 255, 0) #pour 100 pas mal du tout
-    combined_image = np.maximum(bac_image, vesselness)
+    vesselness = np.where(vesselness > 100, 255, 0) # Sets a threshold to keep only relevent vessels (good results for 100)
+    combined_image = np.maximum(bac_image, vesselness) # Combine bac_image et the vesselness
 
     #plt.figure()
-    #plt.imshow(skeleton)
+    #plt.imshow(skeleton) 
     #plt.show()
 
     plt.figure()
@@ -175,7 +133,7 @@ def main(vesselness_path, bac_path, patch_size=200):
             seed_patch = end_points[i:i+patch_size, j:j+patch_size]
             combined_patch = combined_image[i:i+patch_size, j:j+patch_size]
             
-            paths = [follow_path(seed, combined_patch, bac_patch, search_window_size=15, neighborhood_size=30) for seed in np.argwhere(seed_patch > 0)]
+            paths = [follow_path(seed, combined_patch, bac_patch, search_window_size, neighborhood_size) for seed in np.argwhere(seed_patch > 0)] #Starts a path for all extremities
         
             for path in paths:
                 plt.plot([j + point[1] for point in path], [i + point[0] for point in path], color='r')
@@ -183,7 +141,7 @@ def main(vesselness_path, bac_path, patch_size=200):
                 for k in range(len(path) - 1):
                     start_point = (j + path[k][1], i + path[k][0])
                     end_point = (j + path[k + 1][1], i + path[k + 1][0])
-                    cv2.line(bac_image_copy, start_point, end_point, 255, 1)  # Dessiner en blanc sur la copie
+                    cv2.line(bac_image_copy, start_point, end_point, 255, 2)  # Last input is line width
 
     end_time = time.time()
     print(f"Running time: {end_time - start_time} seconds")
